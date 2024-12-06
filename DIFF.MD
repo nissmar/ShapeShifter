@@ -1,0 +1,3 @@
+- diffusion_tensor (ex qem_color_utils) no trilinear
+- data/SIN3DM_GLB --> GT_GLB
+- data/SIN3DM_WT --> GT_WT
