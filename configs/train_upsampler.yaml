@@ -1,0 +1,10 @@
+upsample_fac: 2
+base_resolution: 16
+src_path: 'data/GT_sparse_tensors'
+
+layers: 1
+lr: 0.0005
+features: 64
+dropout: .05
+epochs: 10000
+batch_size: 1
