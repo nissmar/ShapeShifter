@@ -42,9 +42,12 @@ def get_gt_data(cfg, level, model_name):
             '{}/{}/{}.pt'.format(cfg["src_path"], model_name, res_1), weights_only=False)
         X0 = torch.load(
             '{}/{}/{}.pt'.format(cfg["src_path"], model_name, res_2), weights_only=False)
+        X_UP = X.trilinear_upsample(cfg["upsample_fac"])
+        X0 = DiffusionTensor.fill_upsampled_with_gt(X_UP, X0)
         X = X.to_batch(cfg["batch_size"])
         X0 = X0.to_batch(cfg["batch_size"])
-        X_UP = X0.grid
+        X_UP = X_UP.to_batch(cfg["batch_size"])
+        X_UP.grid = X0.grid
         return X, X_UP, X0
 
 

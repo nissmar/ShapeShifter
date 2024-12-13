@@ -35,7 +35,6 @@ def load_diffusion(example_mesh_name, level, src):
 def generate_input(generated_X, diffusion):
     with torch.no_grad():
         diffusion.model_upsampler.eval()
-        out_grid = TODO
         input_X = diffusion.model_upsampler(
             generated_X, generated_X.trilinear_upsample()).detach()
         times = torch.ones((input_X.grid_count,), device=generated_X.device).float(

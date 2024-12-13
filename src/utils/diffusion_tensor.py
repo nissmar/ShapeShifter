@@ -1,7 +1,8 @@
 import fvdb
-import torch 
+import torch
 from meshplot import plot
 import numpy as np
+
 
 def make_gaussian_filter(feat=1, g_size=9):
     def normal_pdf(x, mean=0, std=1):
@@ -19,6 +20,7 @@ def make_gaussian_filter(feat=1, g_size=9):
         feat), np.arange(feat), ...] = gaussian_kernel
     gaussian_filter.weight.requires_grad = False
     return gaussian_filter
+
 
 def blur_tensor(X, iterations=1, blur_kernel=9):
     with torch.no_grad():
@@ -68,6 +70,41 @@ class DiffusionTensor(fvdb.nn.VDBTensor):
             gt_fine_tensor.grid.ijk).jdata
         target_tensor.feature.jdata[to_change_idx] = gt_fine_tensor.jdata
         return DiffusionTensor.from_vdb(target_tensor)
+
+    def trilinear_upsample(self, subdiv_factor=2, normalize_normals=False):
+        """Input
+        -------
+        self: "clean" DiffusionTensor (1 mask)
+
+        Returns
+        -------
+        Trilinealy interpolated DiffusionTensor
+        """
+
+        assert len(self.jdata[..., -1].unique()) == 1
+        diff_tens = self.get_global()
+
+        up_grid = self.grid.subdivided_grid(subdiv_factor=subdiv_factor)
+        new_centers = up_grid.grid_to_world(up_grid.ijk.float())
+        up_feat = self.grid.sample_trilinear(new_centers, diff_tens.feature)
+        normalized_normals, global_offset, colors, mask = self.get_feature_data(
+            up_feat.jdata)
+        if normalize_normals:
+            normalized_normals /= (normalized_normals **
+                                   2).sum(-1, keepdims=True).sqrt()
+        else:
+            normalized_normals /= mask
+
+        colors /= mask
+        global_offset /= mask
+        # mask = 2*mask-1 # normalize to -1, 1
+        diff_tens = DiffusionTensor.get_tensor_from_data(
+            up_grid, normalized_normals, global_offset, colors, mask)
+        diff_tens = diff_tens.get_local()
+        # mask based on offset
+        new_mask = 1.-2.*diff_tens.jdata[..., 3:6].abs().max(-1).values
+        diff_tens.jdata[..., -1] = torch.clamp(new_mask, -1., 1.)
+        return diff_tens
 
     def get_global(self):
         normals, local_offset, colors, mask = self.get_feature_data(
@@ -127,7 +164,7 @@ class DiffusionTensor(fvdb.nn.VDBTensor):
             self.jdata)
         if use_normals:
             normals = normals.cpu().detach().numpy()
-            normals /= np.sqrt((normals **2).sum(-1, keepdims=True))
+            normals /= np.sqrt((normals ** 2).sum(-1, keepdims=True))
             c = normals
         else:
             c = colors.cpu().detach().numpy()/2

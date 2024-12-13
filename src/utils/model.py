@@ -70,9 +70,8 @@ class UpSampler(nn.Module):
             fvnn.Dropout(dropout),
             fvnn.ReLU(inplace=True),
             fvnn.SparseConv3d(hidden_channels, out_channels, kernel_size=1, stride=1)])
-
-    def forward(self, input: fvnn.VDBTensor, out_grid: fvdb.GridBatch):
+        
+    def forward(self, input: fvnn.VDBTensor, x_upsample: fvnn.VDBTensor):
         x = self.encoder(input)
-        x = self.t_conv(x, out_grid=out_grid)
-        return self.decoder(x) 
-
+        x = self.t_conv(x, out_grid=x_upsample.grid)
+        return self.decoder(x) + x_upsample

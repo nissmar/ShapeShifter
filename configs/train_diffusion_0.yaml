@@ -6,8 +6,8 @@ layers: 2
 first_ks: 3
 one_layers: 4
 features: 128
-# epochs: 20000
-epochs: 100000
+epochs: 20000
+# epochs: 100000
 
 lr: 0.0001
 batch_size: 10
