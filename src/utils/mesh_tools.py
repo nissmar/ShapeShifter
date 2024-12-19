@@ -8,6 +8,7 @@ from scipy.spatial import Delaunay
 import matplotlib.pyplot as plt
 import ipywidgets
 
+
 def count_parameters(model, print_result=True):
     num = sum(p.numel() for p in model.parameters() if p.requires_grad)
     if print_result:
@@ -19,6 +20,8 @@ def count_parameters(model, print_result=True):
     return num
 
 # Mesh operations
+
+
 def NDCnormalize(vertices, return_scale=False):
     """normalization in half unit ball"""
     vM = vertices.max(0)
@@ -275,13 +278,13 @@ def NDCnormalize(vertices, return_scale=False):
 #     mp.add_points(points, c, shading={"point_size": size})
 
 
-# def plotSlice(sdf_array, vmax):
-#     def helper(xhi, slice, vmax,  cmap='seismic'):
-#         plt.imshow(xhi[slice], origin='lower',
-#                    cmap=cmap, vmin=-vmax, vmax=vmax)
-#     slider = ipywidgets.IntSlider(
-#         min=0, max=sdf_array.shape[0]-1, step=1, value=sdf_array.shape[0]//2)
-#     return ipywidgets.interact(lambda s: helper(sdf_array, s, vmax), s=slider)
+def plotSlice(sdf_array, vmax):
+    def helper(xhi, slice, vmax,  cmap='seismic'):
+        plt.imshow(xhi[slice], origin='lower',
+                   cmap=cmap, vmin=-vmax, vmax=vmax)
+    slider = ipywidgets.IntSlider(
+        min=0, max=sdf_array.shape[0]-1, step=1, value=sdf_array.shape[0]//2)
+    return ipywidgets.interact(lambda s: helper(sdf_array, s, vmax), s=slider)
 
 
 # # scipy.Spatial
