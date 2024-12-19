@@ -9,15 +9,12 @@ import pymeshlab as ml
 from model import UpSampler, DiffusionCNN
 from fvdb_diffusion import SparseDiffusion
 from diffusion_tensor import DiffusionTensor
-import fvdb
-from IPython.display import clear_output
 import numpy as np
 import torch
-import mesh_tools as mt
 import time
 
 
-def compute_base_grid(model_name, eval_batch_size, base_res=16, src_path="../../data/GT_sparse_tensors"):
+def compute_base_grid(model_name, eval_batch_size, base_res=16, src_path="/home/nmaruani/ShapeShifter/data/GT_sparse_tensors"):
     X0 = torch.load(
         '{}/{}/{}.pt'.format(src_path, model_name, base_res), weights_only=False)
     X0 = X0.to_custom_dense().to_batch(eval_batch_size)
