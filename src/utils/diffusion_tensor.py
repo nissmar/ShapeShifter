@@ -71,6 +71,10 @@ class DiffusionTensor(fvdb.nn.VDBTensor):
         target_tensor.feature.jdata[to_change_idx] = gt_fine_tensor.jdata
         return DiffusionTensor.from_vdb(target_tensor)
 
+    def clip(self):
+        self.feature.jdata[:, 3:6] = torch.clip(
+            self.feature.jdata[:, 3:6], -.5, .5)
+
     def trilinear_upsample(self, subdiv_factor=2, normalize_normals=False):
         """Input
         -------
