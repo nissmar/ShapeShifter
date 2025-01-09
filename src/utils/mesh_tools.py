@@ -65,13 +65,13 @@ def NDCnormalize(vertices, return_scale=False):
 #     return new_mesh
 
 
-# def mesh_grid(grid_size: int, normalize=False):
-#     """create mesh grid with default indexing"""
-#     xx, yy, zz = np.mgrid[:grid_size, :grid_size, :grid_size]
-#     grid_3d = np.column_stack((xx.flatten(), yy.flatten(), zz.flatten()))
-#     if normalize:
-#         return 2 * (grid_3d / (grid_size - 1)) - 1
-#     return grid_3d
+def mesh_grid(grid_size: int, normalize=False):
+    """create mesh grid with default indexing"""
+    xx, yy, zz = np.mgrid[:grid_size, :grid_size, :grid_size]
+    grid_3d = np.column_stack((xx.flatten(), yy.flatten(), zz.flatten()))
+    if normalize:
+        return 2 * (grid_3d / (grid_size - 1)) - 1
+    return grid_3d
 
 
 # def mesh_from_voxels(vox: np.ndarray, iso=0.0, ret=False):
@@ -219,20 +219,20 @@ def NDCnormalize(vertices, return_scale=False):
 #         f.close()
 
 
-# def export_obj(nv: np.ndarray, nf: np.ndarray, name: str, export_lines=False):
-#     if name[:-4] != ".obj":
-#         name += ".obj"
-#     try:
-#         file = open(name, "x")
-#     except:
-#         file = open(name, "w")
-#     for e in nv:
-#         file.write("v {} {} {}\n".format(*e))
-#     file.write("\n")
-#     for face in nf:
-#         header = "l " if export_lines else "f "
-#         file.write(header + " ".join([str(fi + 1) for fi in face]) + "\n")
-#     file.write("\n")
+def export_obj(nv: np.ndarray, nf: np.ndarray, name: str, export_lines=False):
+    if name[:-4] != ".obj":
+        name += ".obj"
+    try:
+        file = open(name, "x")
+    except:
+        file = open(name, "w")
+    for e in nv:
+        file.write("v {} {} {}\n".format(*e))
+    file.write("\n")
+    for face in nf:
+        header = "l " if export_lines else "f "
+        file.write(header + " ".join([str(fi + 1) for fi in face]) + "\n")
+    file.write("\n")
 
 
 # def export_off(nv: np.ndarray, nf: np.ndarray, name: str):
