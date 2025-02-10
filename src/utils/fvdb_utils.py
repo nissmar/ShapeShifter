@@ -58,7 +58,7 @@ def show_grid(grid, with_edges=True):
 
 
 def vdb_marching_cubes(out: fvnn.VDBTensor):
-    nv, nf, _ = out.grid.marching_cubes(out.feature)
+    nv, nf, _ = out.grid.marching_cubes(-out.feature)
     return nv.jdata.cpu().detach().numpy(), nf.jdata.cpu().detach().numpy()
 
 
