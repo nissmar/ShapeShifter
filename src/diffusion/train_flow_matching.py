@@ -84,6 +84,33 @@ class SparseFlowMatching(nn.Module):
         XT = self.sample_xt(t, X0, X0_BLUR)
         return self.loss(self.model(XT, t.flatten()).jdata, X0.jdata)
 
+    # Reverse
+    def p1_to_flow(self, XT, T):
+        p1 = self.model(XT, T)
+        p1.feature.jdata = (p1.jdata-XT.jdata)/(1-T[:, None])
+        return p1
+
+    @torch.no_grad()
+    def reverse_step(self, XT, t_start, t_end):
+        TSTART = t_start.view(1).expand(len(XT.jdata))
+        TEND = t_end.view(1).expand(len(XT.jdata))
+        p1 = self.p1_to_flow(XT, TSTART)
+        p1.feature.jdata *= (TEND-TSTART)[:, None]/2.
+        p1.feature.jdata += XT.jdata
+        p2 = self.p1_to_flow(p1, TSTART + (TEND-TSTART)/2.)
+        p2.feature.jdata *= (TEND-TSTART)[:, None]
+        p2.feature.jdata += XT.jdata
+        return p2
+
+    @torch.no_grad()
+    def reverse_sample(self, XB, n_steps):
+        time_steps = torch.linspace(0, 1.0, n_steps + 1, device=XB.device)
+        self.model.eval()
+        for i in tqdm(range(n_steps-1)):
+            XB = self.reverse_step(XB, time_steps[i], time_steps[i+1])
+        XB = self.model(XB, time_steps[-2].view(1).expand(len(XB.jdata)))
+        return XB
+
 
 if __name__ == '__main__':
     device = 'cuda'
