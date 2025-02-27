@@ -133,9 +133,9 @@ if __name__ == '__main__':
         description='Evaluate Model')
     # Experiment
     parser.add_argument('-src',
-                        default="experiments/", type=str, help="mesh name")
+                        default="experiments/", type=str, help="input folder (contains .pt models)")
     parser.add_argument('-out', default=None, type=str,
-                        help="number of sudivisions")
+                        help="output folder")
     parser.add_argument('-levels', default=4,
                         type=int)
     parser.add_argument('-base_res', default=16, type=int,
