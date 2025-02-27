@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
-import fvdb
 import fvdb.nn as fvnn
+
 
 def sinusoidal_embedding(timesteps, dim):
     half_dim = dim // 2
@@ -10,6 +10,7 @@ def sinusoidal_embedding(timesteps, dim):
     emb = 2**emb * torch.pi
     emb = timesteps[:, None].float() * emb[None, :]
     return torch.cat([emb.sin(), emb.cos()], dim=-1)
+
 
 class DiffusionCNN(nn.Module):
     def __init__(self, channels, layers=2, time_emb=6, one_layers=1, first_ks=3, in_channels=1, out_channels=1, dropout=.01):
@@ -70,7 +71,7 @@ class UpSampler(nn.Module):
             fvnn.Dropout(dropout),
             fvnn.ReLU(inplace=True),
             fvnn.SparseConv3d(hidden_channels, out_channels, kernel_size=1, stride=1)])
-        
+
     def forward(self, input: fvnn.VDBTensor, x_upsample: fvnn.VDBTensor):
         x = self.encoder(input)
         x = self.t_conv(x, out_grid=x_upsample.grid)

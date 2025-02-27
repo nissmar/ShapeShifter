@@ -57,26 +57,8 @@ def show_grid(grid, with_edges=True):
     return mp
 
 
-def vdb_marching_cubes(out: fvnn.VDBTensor):
-    nv, nf, _ = out.grid.marching_cubes(-out.feature)
-    return nv.jdata.cpu().detach().numpy(), nf.jdata.cpu().detach().numpy()
-
-
-def show_vdb_marching_cubes(out: fvnn.VDBTensor):
-    return plot(*vdb_marching_cubes(out))
-
-
 def trilinear_upsample(small_tensor: fvnn.VDBTensor, large_grid: fvdb.GridBatch):
     new_centers = large_grid.grid_to_world(large_grid.ijk.float())
     new_features = small_tensor.grid.sample_trilinear(
         new_centers, small_tensor.feature)
     return fvnn.VDBTensor(large_grid, new_features)
-
-
-def compute_sdf(grid: fvdb.GridBatch, v: np.array, f: np.array) -> fvnn.VDBTensor:
-    points = grid.grid_to_world(grid.ijk.float()).jdata.cpu().detach().numpy()
-    sdf_compute = igl.signed_distance(points, v, f)
-    tensor_vdb = grid_to_VDB(grid)
-    tensor_vdb.feature.jdata = torch.tensor(
-        sdf_compute[0][:, None], device=grid.device, dtype=torch.float32)
-    return tensor_vdb

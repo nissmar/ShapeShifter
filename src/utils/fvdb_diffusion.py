@@ -193,5 +193,5 @@ class SparseDiffusion(nn.Module):  # Inspired by bitfusion by lucidrain
 
         # prediction
         pred = self.model(noisy_latents, times)
-        # return self.loss(pred.jdata, target_X) # TODO replace with target_X?
-        return self.loss(pred.jdata, X.jdata)  # TODO replace with target_X?
+        # return self.loss(pred.jdata, target_X)
+        return self.loss(pred.jdata, X.jdata)

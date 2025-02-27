@@ -5,6 +5,8 @@ import fvdb
 from meshplot import plot
 
 # QEM Utilities
+
+
 def vstars_from_quadrics(Q, P, eps=.05):
     """Compute optimal vertices positions
 
@@ -37,9 +39,11 @@ def vstars_from_quadrics(Q, P, eps=.05):
     ).squeeze(-1)
     return vstars, vh, eigs
 
+
 def get_flat_Qs(bmat):
     indices4x4 = torch.triu_indices(4, 4, device=bmat.device)
     return bmat[:, indices4x4[0], indices4x4[1]]
+
 
 def get_square_Qs(flat_As):
     indices4x4 = torch.triu_indices(4, 4, device=flat_As.device)
@@ -47,6 +51,7 @@ def get_square_Qs(flat_As):
     Q[:, indices4x4[0], indices4x4[1]] = flat_As
     Q.transpose(1, 2)[:, indices4x4[0], indices4x4[1]] = flat_As
     return Q
+
 
 class PoNQ_grid:
     def __init__(self, grid_size: int) -> None:
@@ -106,9 +111,11 @@ class PoNQ_grid:
             min_qem_diff.abs().max(-1, keepdims=True).values, min=min_value)
         div = torch.clip(mag, max=self.grid.voxel_sizes.max()/2)
         return points + min_qem_diff/mag*div
-    
+
     def compute_local_offset(self, eps=.05, clip=True):
-        vstars, _, _ = vstars_from_quadrics(self.Qs,  self.voxel_centers.jdata, eps=eps)
+        vstars, _, _ = vstars_from_quadrics(
+            self.Qs,  self.voxel_centers.jdata, eps=eps)
         if clip:
             vstars = self.clip_to_voxel(vstars)
-        self.local_offset = (vstars-self.voxel_centers.jdata) / self.grid.voxel_sizes.max()
+        self.local_offset = (vstars-self.voxel_centers.jdata) / \
+            self.grid.voxel_sizes.max()
