@@ -1,7 +1,6 @@
 import fvdb
 import fvdb.nn as fvnn
 import trimesh
-import igl
 from meshplot import plot
 import torch
 import numpy as np

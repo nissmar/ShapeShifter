@@ -1,8 +1,6 @@
 import torch
 import numpy as np
-import trimesh
 import fvdb
-from meshplot import plot
 
 # QEM Utilities
 
