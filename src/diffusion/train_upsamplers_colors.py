@@ -5,12 +5,12 @@ import mesh_tools as mt
 import torch
 from tqdm import tqdm
 from fvdb_utils import *
-from diffusion_tensor import DiffusionTensor
 import matplotlib.pyplot as plt
 from model import UpSampler
 import yaml
 import argparse
 from train_diffusion_colors import get_gt_data
+import os
 
 if __name__ == '__main__':
     device = 'cuda'
@@ -28,6 +28,9 @@ if __name__ == '__main__':
 
     with open(args.config, 'r') as f:
         cfg = yaml.load(f, Loader=yaml.Loader)
+
+    if not os.path.exists('checkpoints/upsamplers_colors'):
+        os.makedirs('checkpoints/upsamplers_colors')
 
     res_1 = cfg["base_resolution"]*2**(args.level-1)
     res_2 = cfg["upsample_fac"]*res_1

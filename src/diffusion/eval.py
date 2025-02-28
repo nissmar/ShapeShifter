@@ -84,7 +84,7 @@ def compute_all_generations(example_mesh_name, src, base_res, max_level=3, eval_
     return generated_Xs
 
 
-def poisson_reconst(vstars, normals, colors, save_pc_path=None, save_mesh_path=None, **kwargs):
+def export_pc(vstars, normals, colors, save_pc_path=None, save_mesh_path=None, **kwargs):
     ms = ml.MeshSet()
     v_colors = np.column_stack((colors, np.ones_like(colors[:, :1])))
     nmesh = ml.Mesh(vertex_matrix=vstars,
@@ -122,8 +122,8 @@ def save_generation_pc(generated_X, src_path, level=0, inds=None, min_ind=0):
             colors = np.clip((colors+1)/2., 0, 1)
             save_pc_path = '{}/gen_{}_{}.ply'.format(
                 src_path, min_ind+ind, level)
-            poisson_reconst(vstars, normalized_normals, colors,
-                            save_pc_path)
+            export_pc(vstars, normalized_normals, colors,
+                      save_pc_path)
         else:
             print('void shape!')
 

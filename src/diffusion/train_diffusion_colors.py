@@ -7,7 +7,6 @@ from fvdb_diffusion import SparseDiffusion
 from model import DiffusionCNN
 from datetime import datetime
 import fvdb.nn as fvnn
-import igl
 import argparse
 from tqdm import tqdm
 import matplotlib.pyplot as plt
