@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from model import UpSampler
 import yaml
 import argparse
-from train_diffusion_colors import get_gt_data
+from train_diffusion import get_gt_data
 import os
 
 if __name__ == '__main__':
@@ -29,8 +29,10 @@ if __name__ == '__main__':
     with open(args.config, 'r') as f:
         cfg = yaml.load(f, Loader=yaml.Loader)
 
-    if not os.path.exists('checkpoints/upsamplers_colors'):
-        os.makedirs('checkpoints/upsamplers_colors')
+    if not os.path.exists('checkpoints'):
+        os.makedirs('checkpoints')
+    if not os.path.exists('checkpoints/upsamplers'):
+        os.makedirs('checkpoints/upsamplers')
 
     res_1 = cfg["base_resolution"]*2**(args.level-1)
     res_2 = cfg["upsample_fac"]*res_1
@@ -60,7 +62,7 @@ if __name__ == '__main__':
     plt.yscale('log')
     plt.legend()
     plt.savefig(
-        'checkpoints/upsamplers_colors/{}_{}.png'.format(args.model_name, args.level))
+        'checkpoints/upsamplers/{}_{}.png'.format(args.model_name, args.level))
     model_upsampler.eval()
     torch.save(model_upsampler,
-               'checkpoints/upsamplers_colors/{}_{}.pt'.format(args.model_name, args.level))
+               'checkpoints/upsamplers/{}_{}.pt'.format(args.model_name, args.level))
