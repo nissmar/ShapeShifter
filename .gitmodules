@@ -1,3 +1,0 @@
-[submodule "openvdb"]
-	path = openvdb
-	url = https://github.com/AcademySoftwareFoundation/openvdb.git
