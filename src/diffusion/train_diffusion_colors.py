@@ -69,7 +69,7 @@ if __name__ == '__main__':
     if args.level > 0:
         X, X_UP, X0 = get_gt_data(cfg, args.level, args.model_name)
         model_upsampler = torch.load(
-            './checkpoints/upsamplers/{}_{}.pt'.format(args.model_name, args.level), weights_only=False)
+            './checkpoints/upsamplers_colors/{}_{}.pt'.format(args.model_name, args.level), weights_only=False)
 
         # ABLATION:UPSAMPLER
         # model_upsampler = torch.load(
@@ -132,9 +132,9 @@ if __name__ == '__main__':
             plt.yscale('log')
             plt.legend()
             plt.savefig(
-                'checkpoints/diffusion_models/{}_{}_{}.png'.format(args.model_name, args.level, current_time))
+                'experiments/{}_{}_{}.png'.format(args.model_name, args.level, current_time))
 
-    torch.save(diffusion, 'checkpoints/diffusion_models/{}_{}_{}.pt'.format(
+    torch.save(diffusion, 'experiments/{}_{}_{}.pt'.format(
         args.model_name, args.level, current_time))
-    print('checkpoints/diffusion_models/{}_{}_{}.pt'.format(args.model_name,
+    print('experiments/{}_{}_{}.pt'.format(args.model_name,
           args.level, current_time))
