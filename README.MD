@@ -67,7 +67,7 @@ Run notebooks `src/eval/eval_metrics.ipynb`
 
 ### Train Upsamplers
 
-`bash scripts/train_upsamplers.sh `
+`bash scripts/train_upsamplers.sh`
 
 ### Train Diffusion
 

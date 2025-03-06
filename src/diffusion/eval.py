@@ -36,7 +36,7 @@ def generate_input(generated_X, diffusion):
             generated_X, generated_X.trilinear_upsample()).detach()
         times = torch.ones((input_X.grid_count,), device=generated_X.device).float(
         )*(diffusion.max_T)/diffusion.timesteps
-        times = times[input_X.feature.jidx.long()]
+        times = times[input_X.data.jidx.long()]
         return diffusion.q_sample(input_X, times)[0], input_X
 
 
@@ -110,7 +110,7 @@ def save_generation_pc(generated_X, src_path, level=0, inds=None, min_ind=0):
         inds = range(generated_X.grid_count)
     for ind in inds:
         global_X = DiffusionTensor(
-            generated_X.grid[ind], generated_X.feature[ind]).get_global().remove_mask()
+            generated_X.grid[ind], generated_X.data[ind]).get_global().remove_mask()
         normalized_normals, global_offset, colors, mask = global_X.get_feature_data(
             global_X.jdata)
         if len(normalized_normals > 0):

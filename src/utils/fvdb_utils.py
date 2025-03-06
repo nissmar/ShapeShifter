@@ -12,7 +12,7 @@ def mesh_to_grid(v, f, grid_size, device='cuda'):
     if isinstance(v, np.ndarray):
         v = fvdb.JaggedTensor(torch.tensor(v, device=device))
         f = fvdb.JaggedTensor(torch.tensor(f, device=device))
-    return fvdb.sparse_grid_from_mesh(v, f, voxel_sizes=voxel_sizes, origins=origins)
+    return fvdb.gridbatch_from_mesh(v, f, voxel_sizes=voxel_sizes, origins=origins)
 
 
 def grid_to_VDB(grid: fvdb.GridBatch, torch_func=torch.zeros, additional_feat=[], dtype=torch.float32):
@@ -59,5 +59,5 @@ def show_grid(grid, with_edges=True):
 def trilinear_upsample(small_tensor: fvnn.VDBTensor, large_grid: fvdb.GridBatch):
     new_centers = large_grid.grid_to_world(large_grid.ijk.float())
     new_features = small_tensor.grid.sample_trilinear(
-        new_centers, small_tensor.feature)
+        new_centers, small_tensor.data)
     return fvnn.VDBTensor(large_grid, new_features)

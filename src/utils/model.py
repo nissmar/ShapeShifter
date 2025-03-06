@@ -40,7 +40,7 @@ class DiffusionCNN(nn.Module):
     def forward(self, x, t, cond=None):
         t = sinusoidal_embedding(t, self.time_emb)
         new_x = fvnn.VDBTensor(x.grid, x.grid.jagged_like(
-            torch.cat((x.feature.jdata, t), -1)))
+            torch.cat((x.data.jdata, t), -1)))
         return self.net(new_x)
 
 

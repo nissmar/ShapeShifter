@@ -14,6 +14,7 @@ import torch.nn as nn
 import torch
 import mesh_tools as mt
 import yaml
+import os
 
 
 def clip_data(X0, X0_BLUR, size):
@@ -21,9 +22,9 @@ def clip_data(X0, X0_BLUR, size):
     centers = X0.grid.ijk.jdata[ind]
     new_ijk_min = centers - size
     new_ijk_max = centers + size
-    cf, cg = X0.grid.clip(X0.feature, new_ijk_min, new_ijk_max)
+    cf, cg = X0.grid.clip(X0.data, new_ijk_min, new_ijk_max)
     new_X0 = fvnn.VDBTensor(cg, cf)
-    cf, cg = X0_BLUR.grid.clip(X0_BLUR.feature, new_ijk_min, new_ijk_max)
+    cf, cg = X0_BLUR.grid.clip(X0_BLUR.data, new_ijk_min, new_ijk_max)
     new_X0_BLUR = fvnn.VDBTensor(cg, cf)
     return new_X0, new_X0_BLUR
 
@@ -62,6 +63,11 @@ if __name__ == '__main__':
     parser.add_argument('-config', type=str,
                         help="config path")
     args = parser.parse_args()
+
+    try:
+        os.mkdir('checkpoints/diffusion_models')
+    except:
+        pass
 
     with open(args.config, 'r') as f:
         cfg = yaml.load(f, Loader=yaml.Loader)
@@ -132,9 +138,9 @@ if __name__ == '__main__':
             plt.yscale('log')
             plt.legend()
             plt.savefig(
-                'experiments/{}_{}_{}.png'.format(args.model_name, args.level, current_time))
+                'checkpoints/diffusion_models/{}_{}_{}.png'.format(args.model_name, args.level, current_time))
 
-    torch.save(diffusion, 'experiments/{}_{}_{}.pt'.format(
+    torch.save(diffusion, 'checkpoints/diffusion_models/{}_{}_{}.pt'.format(
         args.model_name, args.level, current_time))
-    print('experiments/{}_{}_{}.pt'.format(args.model_name,
+    print('checkpoints/diffusion_models/{}_{}_{}.pt'.format(args.model_name,
           args.level, current_time))

@@ -94,7 +94,7 @@ class SparseDiffusion(nn.Module):  # Inspired by bitfusion by lucidrain
             # get predicted x0
             x_start = self.model(noisy_grid, time.repeat(len(noisy_grid.jidx)))
             if not clip is None:
-                x_start.feature.jdata = torch.clip(x_start.jdata, -clip, clip)
+                x_start.data.jdata = torch.clip(x_start.jdata, -clip, clip)
             if time_next == 0:
                 return x_start
 
@@ -122,7 +122,7 @@ class SparseDiffusion(nn.Module):  # Inspired by bitfusion by lucidrain
 
             # get noise
             noise = torch.randn_like(noisy_grid.jdata)
-            noisy_grid.feature.jdata = mean + \
+            noisy_grid.data.jdata = mean + \
                 (0.5 * log_variance).exp() * noise
 
     @torch.no_grad()
@@ -152,7 +152,7 @@ class SparseDiffusion(nn.Module):  # Inspired by bitfusion by lucidrain
             # get predicted noise
             pred_noise_jdata = (noisy_grid.jdata - alpha *
                                 x_start.jdata) / sigma.clamp(min=1e-8)
-            noisy_grid.feature.jdata = x_start.jdata * \
+            noisy_grid.data.jdata = x_start.jdata * \
                 alpha_next + pred_noise_jdata * sigma_next
 
         return (noisy_grid)
@@ -162,7 +162,7 @@ class SparseDiffusion(nn.Module):  # Inspired by bitfusion by lucidrain
         return self.ddim_sample(noisy_grid)
 
     def q_sample(self, X: fvnn.VDBTensor, times: torch.tensor, X_Blur: fvnn.VDBTensor = None):
-        assert len(times) == len(X.feature.jidx)
+        assert len(times) == len(X.data.jidx)
         # compute constant
         noise_level = self.log_snr(times)
         alpha, sigma = log_snr_to_alpha_sigma(noise_level)
@@ -179,14 +179,14 @@ class SparseDiffusion(nn.Module):  # Inspired by bitfusion by lucidrain
 
         # corrupted X
         noised_img = alpha[:, None] * target_X + sigma[:, None] * noise
-        return fvnn.VDBTensor(grid=X.grid, feature=X.grid.jagged_like(noised_img)), target_X
+        return fvnn.VDBTensor(grid=X.grid, data=X.grid.jagged_like(noised_img)), target_X
 
     def forward(self, X: fvnn.VDBTensor, X_Blur: fvnn.VDBTensor = None):
 
         # random times
         times = torch.zeros((X.grid_count,), device=self.device).float().uniform_(
             0., self.max_T/self.timesteps)
-        times = times[X.feature.jidx.long()]
+        times = times[X.data.jidx.long()]
 
         noisy_latents, target_X = self.q_sample(X, times, X_Blur)
 
