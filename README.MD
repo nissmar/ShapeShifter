@@ -7,7 +7,9 @@
 <sup>1</sup>Inria, <sup>2</sup>Université Côte d"Azur, <sup>3</sup>Adobe Research, <sup>4</sup>École polytechnique
 
 
-![alt text](media/shapeshifter-summary.svg)
+<div align="center">
+  <img src="media/shapeshifter-summary.svg" alt="ShapeShifter Summary" width="80%">
+</div>
 
 ## News
 
