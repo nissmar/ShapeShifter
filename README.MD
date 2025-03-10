@@ -4,12 +4,14 @@
 
 [Nissim Maruani](https://nissmar.github.io)<sup>1,2</sup>, [Wang Yifan](https://yifita.netlify.app)<sup>3</sup>, [Matthew Fisher](https://techmatt.github.io)<sup>3</sup>, [Pierre Alliez](https://team.inria.fr/titane/pierre-alliez/)<sup>1,2</sup>, [Mathieu Desbrun](https://pages.saclay.inria.fr/mathieu.desbrun/)<sup>1,4</sup>.
 
-<sup>1</sup>Inria, <sup>2</sup>Université Côte d"Azur, <sup>3</sup>Adobe Research, <sup>4</sup>École polytechnique
+<sup>1</sup>Inria, <sup>2</sup>Université Côte d'Azur, <sup>3</sup>Adobe Research, <sup>4</sup>École polytechnique
 
 
 <div align="center">
   <img src="media/shapeshifter-summary.svg" alt="ShapeShifter Summary" width="80%">
 </div>
+
+Please see our [project page](https://nissmar.github.io/projects/shapeshifter/) for video presentation & 3D meshes.
 
 ## News
 
