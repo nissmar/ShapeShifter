@@ -156,6 +156,9 @@ cython_debug/
 
 .vscode
 data
+checkpoints
+output
+meshed_output
 
 *.pt
 *.pth
