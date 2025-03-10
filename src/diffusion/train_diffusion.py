@@ -75,7 +75,7 @@ if __name__ == '__main__':
     if args.level > 0:
         X, X_UP, X0 = get_gt_data(cfg, args.level, args.model_name)
         model_upsampler = torch.load(
-            './checkpoints/upsamplers_colors/{}_{}.pt'.format(args.model_name, args.level), weights_only=False)
+            './checkpoints/upsamplers/{}_{}.pt'.format(args.model_name, args.level), weights_only=False)
 
         # ABLATION:UPSAMPLER
         # model_upsampler = torch.load(
