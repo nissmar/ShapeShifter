@@ -47,7 +47,7 @@ if __name__ == '__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     if args.out is None:
-        OUT = SRC.replace("output", "textured_output")
+        OUT = SRC.replace("output", "meshed_output")
     else:
         OUT = args.out
 
@@ -55,8 +55,11 @@ if __name__ == '__main__':
     for name in tqdm(os.listdir(SRC)):
         base_save_path = '{}/{}'.format(OUT, name)
 
-        data_mat = '/home/nmaruani/ShapeShifter/data/materials/{}.mtl'.format(
+        data_mat = './data/materials/{}.mtl'.format(
             name)
+        if not os.path.isfile(data_mat):
+            print('Warning: material not found, switching to default mat')
+            data_mat = './data/materials/default.mtl'
         os.mkdir(base_save_path)
         for i in range(args.num):
             save_path = '{}/00{}'.format(base_save_path, i)

@@ -14,7 +14,7 @@ import torch
 import time
 
 
-def compute_base_grid(model_name, eval_batch_size, base_res=16, src_path="/home/nmaruani/ShapeShifter/data/GT_sparse_tensors"):
+def compute_base_grid(model_name, eval_batch_size, base_res=16, src_path="./data/GT_sparse_tensors"):
     X0 = torch.load(
         '{}/{}/{}.pt'.format(src_path, model_name, base_res), weights_only=False)
     X0 = X0.to_custom_dense().to_batch(eval_batch_size)
@@ -56,13 +56,13 @@ def generate_level(generated_X, i, example_mesh_name, src, ddim_steps=None, verb
     return DiffusionTensor.from_vdb(generated_X).remove_mask()
 
 
-def compute_all_generations(example_mesh_name, src, base_res, max_level=3, eval_batch_size=10, features=10, ddim_steps=None, X0G=None, verbose=False):
+def compute_all_generations(example_mesh_name, src, base_res, max_level=3, eval_batch_size=10, features=10, ddim_steps=None, X0G=None, verbose=False, src_path="./data/GT_sparse_tensors"):
     generated_Xs = []
     # blurs = []
     diffusion = load_diffusion(example_mesh_name, 0, src)
     diffusion.eval()
     if X0G is None:
-        X0G = compute_base_grid(example_mesh_name, eval_batch_size, base_res)
+        X0G = compute_base_grid(example_mesh_name, eval_batch_size, base_res, src_path)
     t0 = time.time()
     if ddim_steps is None:
         print('using ddpm')
@@ -133,16 +133,18 @@ if __name__ == '__main__':
         description='Evaluate Model')
     # Experiment
     parser.add_argument('-src',
-                        default="experiments/", type=str, help="input folder (contains .pt models)")
+                        default="checkpoints/diffusion_models/", type=str, help="input folder (contains .pt models)")
     parser.add_argument('-out', default=None, type=str,
                         help="output folder")
     parser.add_argument('-levels', default=4,
-                        type=int)
-    parser.add_argument('-base_res', default=16, type=int,
-                        help="base resolution")
+                        type=int, help="number of sudivisions")
     parser.add_argument('-ddim_steps', default=None, type=int,
-                        help="base resolution")
-    parser.add_argument('-batch_size', default=10, type=int,
+                        help="ddim_steps, is None then ddpm is used")
+    parser.add_argument('-batch_size', default=5, type=int,
+                        help="batch size")
+    parser.add_argument('-total_num', default=10, type=int,
+                        help="total number of generated shapes")
+    parser.add_argument('-base_res', default=16, type=int,
                         help="base resolution")
     args = parser.parse_args()
 
@@ -151,31 +153,30 @@ if __name__ == '__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     if args.out is None:
-        OUT = SRC.replace("experiments", "output")
+        OUT = SRC.replace("checkpoints/diffusion_models", "output")
     else:
         OUT = args.out
-    # return generated_Xs, blurs
-
     try:
         os.mkdir(OUT)
     except:
-        print('dir exists!')
+        print('dir exists!')    
     names = np.unique([e.split('_')[0] for e in os.listdir(SRC)])
     print('NAMES: ', ' '.join(names))
     for name in names:
         # for name in ["vase"]:
         save_path = '{}/{}'.format(OUT, name)
-        try:
-            os.mkdir(save_path)
-            min_ind = 0
-        except:
-            c_f = glob.glob("{}/gen_*.ply".format(save_path))
-            min_ind = max([int(e[-7]) for e in c_f])+1
-            print('dir exists!')
-        with torch.no_grad():
-            GX = compute_all_generations(
-                name, SRC, args.base_res, max_level=args.levels, eval_batch_size=args.batch_size, ddim_steps=args.ddim_steps)
-            for i, g in enumerate(GX):
-                path = '{}/gen_{}_{}.pt'.format(save_path, min_ind, i)
-                torch.save(g, path)
-                save_generation_pc(g, save_path, i, min_ind=min_ind)
+        for _ in range(args.total_num//args.batch_size):
+            try:
+                os.mkdir(save_path)
+                min_ind = 0
+            except:
+                c_f = glob.glob("{}/gen_*.ply".format(save_path))
+                min_ind = max([int(e[-7]) for e in c_f])+1
+                print('dir exists!')
+            with torch.no_grad():
+                GX = compute_all_generations(
+                    name, SRC, args.base_res, max_level=args.levels, eval_batch_size=args.batch_size, ddim_steps=args.ddim_steps)
+                for i, g in enumerate(GX):
+                    path = '{}/gen_{}_{}.pt'.format(save_path, min_ind, i)
+                    torch.save(g, path)
+                    save_generation_pc(g, save_path, i, min_ind=min_ind)

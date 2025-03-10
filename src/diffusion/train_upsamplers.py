@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from model import UpSampler
 import yaml
 import argparse
-from train_diffusion_colors import get_gt_data
+from train_diffusion import get_gt_data
 import os
 
 if __name__ == '__main__':

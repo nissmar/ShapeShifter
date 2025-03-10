@@ -49,7 +49,7 @@ TODO
 
 Sample and extract pointclouds
 ```shell
-python src/diffusion/eval.py
+python src/diffusion/sample_diffusion.py
 ``` 
 
 ### Mesh
@@ -75,3 +75,4 @@ Run notebooks `src/eval/eval_metrics.ipynb`
 
 `bash scripts/train_diffusion_up.sh`
 
+bash scripts/train_upsamplers.sh ; bash scripts/train_diffusion_0.sh ; bash scripts/train_diffusion_up.sh
