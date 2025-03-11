@@ -64,7 +64,7 @@ python src/meshing/mesh_with_poisson_or_apss.py
  
 Compute the metrics with [src/eval/eval_metrics.ipynb](src/eval/eval_metrics.ipynb)
 
-## Train 
+## Training
 
 ### Sequential training
 
@@ -92,3 +92,7 @@ For subsequent levels:
 python src/diffusion/train_upsamplers.py -model_name "acropolis" -level 1 -config "./configs/train_upsampler.yaml" ; 
 python src/diffusion/train_diffusion.py -model_name "acropolis" -level 1 -config "./configs/train_diffusion_up.yaml"
 ```
+
+## Acknowledgments
+
+This work was supported by the French government through the 3IA Cote d’Azur Investments in the project managed by the National Research Agency (ANR-23-IACL-0001), Ansys, Adobe Research, and a Choose France Inria chair.
