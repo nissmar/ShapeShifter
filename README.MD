@@ -44,6 +44,7 @@ cd ../..
 
 Download the data and/or pre-trained checkpoints [here](https://drive.google.com/drive/u/2/folders/1na3wXBaAqz21lxmbItQHOXn4tSJOX6TQ) and place them at the source of this repository.
 
+To process your own data, see [here](src/shape_encoding/README.MD). 
 
 ## Quickstart
 
@@ -65,25 +66,29 @@ Compute the metrics with [src/eval/eval_metrics.ipynb](src/eval/eval_metrics.ipy
 
 ## Train 
 
+### Sequential training
+
+Training roughly takes 12 minutes for each level (upsampler+diffusion). The 5 levels can be trained sequentially on a single machine.
+
+To train a single shape:
+```shell
+bash scripts/train_single_shape.sh acropolis
+```
+To reproduce the experiments of the paper:
+```shell
+bash scripts/train_all.sh
+```
+
 ### Parallel training 
 
-All of the levels (upsampler + diffusion) are independent of each other and can be trained in parallel. Training the upsampler + the diffusion model roughly takes 12 minutes per level. 
+All of the levels (upsampler + diffusion) are independent of each other and can be trained in parallel. 
 
 For the first level:
 ```shell
 python src/diffusion/train_diffusion.py -model_name "acropolis" -level 0 -config "./configs/train_diffusion_0.yaml"
 ```
-For the subsequent levels:
+For subsequent levels:
 ```shell
 python src/diffusion/train_upsamplers.py -model_name "acropolis" -level 1 -config "./configs/train_upsampler.yaml" ; 
 python src/diffusion/train_diffusion.py -model_name "acropolis" -level 1 -config "./configs/train_diffusion_up.yaml"
-```
-
-### Sequential training
-
-Easier but longer:
-```shell
-bash scripts/train_upsamplers.sh ;
-bash scripts/train_diffusion_0.sh ;
-bash scripts/train_diffusion_up.sh
 ```

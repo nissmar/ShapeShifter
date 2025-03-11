@@ -63,7 +63,12 @@ if __name__ == '__main__':
     parser.add_argument('-config', type=str,
                         help="config path")
     args = parser.parse_args()
-
+    
+    try:
+        os.mkdir('checkpoints')
+    except:
+        pass
+    
     try:
         os.mkdir('checkpoints/diffusion_models')
     except:
