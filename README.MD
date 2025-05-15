@@ -25,7 +25,7 @@ Please see our [project page](https://nissmar.github.io/projects/shapeshifter/) 
 git clone --recursive https://github.com/nissmar/ShapeShifter.git
 ```
 
-2. Create the `shapeshifter` conda environment:
+2. Create the `shapeshifter` conda environment (tested with CUDA 12.1):
 ````shell
 conda env create -f dev_env.yml
 conda activate shapeshifter
