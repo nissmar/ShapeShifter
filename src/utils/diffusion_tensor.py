@@ -39,7 +39,7 @@ class DiffusionTensor(fvdb.nn.VDBTensor):
     """features: normals, offset (local or global), mask"""
     @staticmethod
     def from_vdb(vdb_tensor: fvdb.nn.VDBTensor):
-        return DiffusionTensor(vdb_tensor.grid, vdb_tensor.feature)
+        return DiffusionTensor(vdb_tensor.grid, vdb_tensor.data)
 
     @staticmethod
     def get_feature_data(jdata):
@@ -68,12 +68,12 @@ class DiffusionTensor(fvdb.nn.VDBTensor):
         target_tensor.jdata[..., -1] = -1
         to_change_idx = target_tensor.grid.ijk_to_index(
             gt_fine_tensor.grid.ijk).jdata
-        target_tensor.feature.jdata[to_change_idx] = gt_fine_tensor.jdata
+        target_tensor.data.jdata[to_change_idx] = gt_fine_tensor.jdata
         return DiffusionTensor.from_vdb(target_tensor)
 
     def clip(self):
-        self.feature.jdata[:, 3:6] = torch.clip(
-            self.feature.jdata[:, 3:6], -.5, .5)
+        self.data.jdata[:, 3:6] = torch.clip(
+            self.data.jdata[:, 3:6], -.5, .5)
 
     def trilinear_upsample(self, subdiv_factor=2, normalize_normals=False):
         """Input
@@ -90,7 +90,7 @@ class DiffusionTensor(fvdb.nn.VDBTensor):
 
         up_grid = self.grid.subdivided_grid(subdiv_factor=subdiv_factor)
         new_centers = up_grid.grid_to_world(up_grid.ijk.float())
-        up_feat = self.grid.sample_trilinear(new_centers, diff_tens.feature)
+        up_feat = self.grid.sample_trilinear(new_centers, diff_tens.data)
         normalized_normals, global_offset, colors, mask = self.get_feature_data(
             up_feat.jdata)
         if normalize_normals:
@@ -134,32 +134,32 @@ class DiffusionTensor(fvdb.nn.VDBTensor):
         dense_x_flat[mask.flatten(), -1] = -1
         dense_x = dense_x_flat.view(dense_x.shape)
         ijk_min = self.grid.ijk.jdata.min(0).values
-        vdb_tensor = self.from_dense(
+        vdb_tensor = fvdb.nn.vdbtensor_from_dense(
             dense_x, ijk_min=ijk_min, origins=self.grid.origins, voxel_sizes=self.grid.voxel_sizes)
 
         # add blur
         to_change = vdb_tensor.jdata[..., -1] < 0
         blur_x = blur_tensor(vdb_tensor, blur_kernel=blur_kernel)
-        # blur_x.feature.jdata[..., :-1] /= blur_x.jdata.abs().max(0).values[None, :-1]
-        blur_x.feature.jdata[..., -1] = -1
-        vdb_tensor.feature.jdata[to_change] = blur_x.feature.jdata[to_change]
+        # blur_x.data.jdata[..., :-1] /= blur_x.jdata.abs().max(0).values[None, :-1]
+        blur_x.data.jdata[..., -1] = -1
+        vdb_tensor.data.jdata[to_change] = blur_x.data.jdata[to_change]
         return DiffusionTensor.from_vdb(vdb_tensor)
 
     def to_batch(self, batch_size=1):
         return fvdb.nn.VDBTensor(
             fvdb.jcat([self.grid for _ in range(batch_size)]),
-            fvdb.jcat([self.jdata for _ in range(batch_size)])
+            fvdb.jcat([self.data for _ in range(batch_size)])
         )
 
     def remove_mask(self, threshold=0):
-        in_mask = [self.feature[i].jdata[:, -1] >
+        in_mask = [self.data[i].jdata[:, -1] >
                    threshold for i in range(self.grid_count)]
         jagged_ijks = fvdb.JaggedTensor(
-            [self.grid[i].ijk.jdata[in_mask[i]] for i in range(self.batch_size)])
-        new_grid = fvdb.sparse_grid_from_ijk(
+            [self.grid[i].ijk.jdata[in_mask[i]] for i in range(self.grid_count)])
+        new_grid = fvdb.gridbatch_from_ijk(
             jagged_ijks, origins=self.grid.origins, voxel_sizes=self.grid.voxel_sizes)
         feat = fvdb.JaggedTensor(
-            [self.feature[i].jdata[in_mask[i]] for i in range(self.batch_size)])
+            [self.data[i].jdata[in_mask[i]] for i in range(self.grid_count)])
         feat.jdata[..., -1] = 1
         return DiffusionTensor(new_grid, feat)
 

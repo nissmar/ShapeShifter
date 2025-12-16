@@ -22,9 +22,9 @@ def clip_data(X0, X0_BLUR, size):
     centers = X0.grid.ijk.jdata[ind]
     new_ijk_min = centers - size
     new_ijk_max = centers + size
-    cf, cg = X0.grid.clip(X0.feature, new_ijk_min, new_ijk_max)
+    cf, cg = X0.grid.clip(X0.data, new_ijk_min, new_ijk_max)
     new_X0 = fvnn.VDBTensor(cg, cf)
-    cf, cg = X0_BLUR.grid.clip(X0_BLUR.feature, new_ijk_min, new_ijk_max)
+    cf, cg = X0_BLUR.grid.clip(X0_BLUR.data, new_ijk_min, new_ijk_max)
     new_X0_BLUR = fvnn.VDBTensor(cg, cf)
     return new_X0, new_X0_BLUR
 
@@ -76,18 +76,18 @@ class SparseFlowMatching(nn.Module):
         x_0 = torch.randn_like(
             X0.jdata) if X0_BLUR is None else self.add_x0_noise(X0_BLUR)
         x_t = (1 - t) * x_0 + t * x_1
-        return fvnn.VDBTensor(grid=X0.grid, feature=X0.grid.jagged_like(x_t))
+        return fvnn.VDBTensor(X0.grid, X0.grid.jagged_like(x_t))
 
     def forward(self, X0, X0_BLUR=None):
         t = torch.rand(X0.grid_count, 1, device=X0.device)
-        t = t[X0.feature.jidx.long()]
+        t = t[X0.data.jidx.long()]
         XT = self.sample_xt(t, X0, X0_BLUR)
         return self.loss(self.model(XT, t.flatten()).jdata, X0.jdata)
 
     # Reverse
     def p1_to_flow(self, XT, T):
         p1 = self.model(XT, T)
-        p1.feature.jdata = (p1.jdata-XT.jdata)/(1-T[:, None])
+        p1.data.jdata = (p1.jdata-XT.jdata)/(1-T[:, None])
         return p1
 
     @torch.no_grad()
@@ -95,11 +95,11 @@ class SparseFlowMatching(nn.Module):
         TSTART = t_start.view(1).expand(len(XT.jdata))
         TEND = t_end.view(1).expand(len(XT.jdata))
         p1 = self.p1_to_flow(XT, TSTART)
-        p1.feature.jdata *= (TEND-TSTART)[:, None]/2.
-        p1.feature.jdata += XT.jdata
+        p1.data.jdata *= (TEND-TSTART)[:, None]/2.
+        p1.data.jdata += XT.jdata
         p2 = self.p1_to_flow(p1, TSTART + (TEND-TSTART)/2.)
-        p2.feature.jdata *= (TEND-TSTART)[:, None]
-        p2.feature.jdata += XT.jdata
+        p2.data.jdata *= (TEND-TSTART)[:, None]
+        p2.data.jdata += XT.jdata
         return p2
 
     @torch.no_grad()

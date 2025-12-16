@@ -43,8 +43,8 @@ def label_dilated_crust(source_tensor: fvnn.VDBTensor, dilated_grid: fvdb.GridBa
     local_sdf[flat_neighbors == -1] = 0
     local_sdf = local_sdf.sum(-1)/(flat_neighbors != -1).sum(-1)
 
-    dilated_crust_tensor.feature.jdata = local_sdf[:, None]
-    dilated_crust_tensor.feature.jdata[in_source_mask] = 0
+    dilated_crust_tensor.data.jdata = local_sdf[:, None]
+    dilated_crust_tensor.data.jdata[in_source_mask] = 0
 
     return dilated_crust_tensor
 
@@ -56,11 +56,11 @@ def label_dual_grid(dilated_grid: fvdb.GridBatch, dilated_crust_tensor: fvnn.VDB
     dilated_centers = dilated_grid.grid_to_world(dilated_grid.ijk.float())
 
     new_feature = dual_grid.splat_trilinear(
-        dilated_centers, dilated_crust_tensor.feature)
+        dilated_centers, dilated_crust_tensor.data)
     dual_tensor = fvdb.nn.VDBTensor(dual_grid, new_feature)
 
     # label unlabeled (internal) voxels
-    is_unlabeled = (dual_tensor.feature.jdata == 0).squeeze()
+    is_unlabeled = (dual_tensor.data.jdata == 0).squeeze()
     offset = -1 + torch.tensor([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0], [
                                1, 0, 1], [0, 1, 1], [1, 1, 1]], device=is_unlabeled.device)
 
@@ -74,8 +74,8 @@ def label_dual_grid(dilated_grid: fvdb.GridBatch, dilated_crust_tensor: fvnn.VDB
     guess_sign = (normals[primal_index]*(dual_centers.jdata[is_unlabeled]
                   [:, None, :]-vstars[primal_index])).sum(-1).mean(-1)
 
-    dual_tensor.feature.jdata[is_unlabeled] = guess_sign.unsqueeze(-1)
-    dual_tensor.feature.jdata = torch.sign(dual_tensor.feature.jdata)
+    dual_tensor.data.jdata[is_unlabeled] = guess_sign.unsqueeze(-1)
+    dual_tensor.data.jdata = torch.sign(dual_tensor.data.jdata)
     return dual_tensor
 
 
@@ -98,8 +98,8 @@ def assign_dilated_vstars(source_tensor: fvnn.VDBTensor, dilated_grid: fvdb.Grid
 
     out_feat = out_feat.sum(-2)/(flat_neighbors != -1).sum(-1, True)
 
-    dilated_tensor.feature.jdata = out_feat
-    dilated_tensor.feature.jdata[in_source_mask] = source_tensor.jdata[neighbors.jdata[:,
+    dilated_tensor.data.jdata = out_feat
+    dilated_tensor.data.jdata[in_source_mask] = source_tensor.jdata[neighbors.jdata[:,
                                                                                        1, 1, 1][in_source_mask]]
 
     return dilated_tensor, in_source_mask
@@ -186,7 +186,7 @@ def mesh_mc(source_tensor: fvnn.VDBTensor, filepath: str):
     guess_sign = (normals[primal_index]*(dual_centers.jdata[:,
                   None, :]-vstars[primal_index])).sum(-1)
     guess_sign[primal_index == -1] = 0
-    dual_tensor.feature.jdata = guess_sign.sum(
+    dual_tensor.data.jdata = guess_sign.sum(
         -1, True)/(primal_index != -1).sum(-1, True)
     v, f = vdb_marching_cubes(dual_tensor)
     ms = ml.MeshSet()
@@ -246,7 +246,7 @@ if __name__ == '__main__':
                     '{}/{}/gen_{}_{}.pt'.format(SRC, name, i, args.level), weights_only=False)
 
                 source_tensor = DiffusionTensor(
-                    tens.grid[i], tens.feature[i]).remove_mask()
+                    tens.grid[i], tens.data[i]).remove_mask()
 
                 mesh_dc(source_tensor, '{}/dc.ply'.format(save_path))
                 mesh_mc(source_tensor, '{}/mc.ply'.format(save_path))
